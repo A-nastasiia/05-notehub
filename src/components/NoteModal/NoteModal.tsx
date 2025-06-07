@@ -1,31 +1,43 @@
-import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
-import { NoteForm } from "../NoteForm/NoteForm";
-
-import css from "./NoteModal.module.css";
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import NoteForm from '../NoteForm/NoteForm';
+import type { CreateNoteRequest } from '../../types/note';
+import css from './NoteModal.module.css';
 
 interface NoteModalProps {
+  isOpen: boolean;
   onClose: () => void;
+  onSubmit: (values: CreateNoteRequest) => void;
 }
 
-const NoteModal: React.FC<NoteModalProps> = ({ onClose }) => {
+const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, onSubmit }) => {
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
     };
-    window.addEventListener("keydown", handleEsc);
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
 
     return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleEsc);
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
     };
-  }, [onClose]);
+  }, [isOpen, onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   };
+
+  if (!isOpen) {
+    return null;
+  }
 
   return createPortal(
     <div
@@ -35,7 +47,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ onClose }) => {
       onClick={handleBackdropClick}
     >
       <div className={css.modal}>
-        <NoteForm onClose={onClose} />
+        <NoteForm onSubmit={onSubmit} onCancel={onClose} />
       </div>
     </div>,
     document.body

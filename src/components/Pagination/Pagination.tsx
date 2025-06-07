@@ -1,58 +1,37 @@
-import React from "react";
-import ReactPaginate from "react-paginate";
-
-import css from "./Pagination.module.css";
+import ReactPaginate from 'react-paginate';
+import css from './Pagination.module.css';
 
 interface PaginationProps {
-  pageCount: number;
+  totalPages: number;
   currentPage: number;
   onPageChange: (selectedPage: number) => void;
-
-  nextLabel?: React.ReactNode;
-  previousLabel?: React.ReactNode;
-  breakLabel?: React.ReactNode;
-  pageRangeDisplayed?: number;
-
-  [key: string]: any;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
-  pageCount,
-  currentPage,
-  onPageChange,
-  nextLabel = "→",
-  previousLabel = "←",
-  breakLabel = "...",
-  pageRangeDisplayed = 3,
-  ...restProps
+const Pagination: React.FC<PaginationProps> = ({ 
+  totalPages, 
+  currentPage, 
+  onPageChange 
 }) => {
-  const handlePageChange = (selectedItem: { selected: number }) => {
-    onPageChange(selectedItem.selected + 1);
-  };
+  if (totalPages <= 1) {
+    return null;
+  }
 
-  if (pageCount <= 1) return null;
+  const handlePageClick = (selectedItem: { selected: number }) => {
+    onPageChange(selectedItem.selected + 1); // ReactPaginate uses 0-based indexing
+  };
 
   return (
     <ReactPaginate
-      breakLabel={breakLabel}
-      nextLabel={nextLabel}
-      onPageChange={handlePageChange}
-      pageRangeDisplayed={pageRangeDisplayed}
-      pageCount={pageCount}
-      previousLabel={previousLabel}
-      forcePage={currentPage - 1} 
+      pageCount={totalPages}
+      forcePage={currentPage - 1} // Convert to 0-based indexing
+      onPageChange={handlePageClick}
       containerClassName={css.pagination}
-      pageClassName={css.pageItem}
-      pageLinkClassName={css.pageLink}
-      previousClassName={css.pageItem}
-      previousLinkClassName={css.pageLink}
-      nextClassName={css.pageItem}
-      nextLinkClassName={css.pageLink}
-      breakClassName={css.pageItem}
-      breakLinkClassName={css.pageLink}
       activeClassName={css.active}
-      disabledClassName={css.disabled}
-      {...restProps}
+      pageRangeDisplayed={5}
+      marginPagesDisplayed={2}
+      previousLabel="‹"
+      nextLabel="›"
+      breakLabel="..."
     />
   );
 };

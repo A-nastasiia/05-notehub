@@ -1,52 +1,33 @@
-import React, { useState } from "react";
-import type { Note } from "../../types/note";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteNote } from "../../services/noteService";
-import { toast } from "react-hot-toast";
-
-import css from "./NoteList.module.css";
+import type { Note } from '../../types/note';
+import css from './NoteList.module.css';
 
 interface NoteListProps {
   notes: Note[];
+  onDeleteNote: (id: string) => void;
 }
 
-const NoteList: React.FC<NoteListProps> = ({ notes }) => {
-  const queryClient = useQueryClient();
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+const NoteList: React.FC<NoteListProps> = ({ notes, onDeleteNote }) => {
+  const handleDelete = (id: string) => {
+    onDeleteNote(id);
+  };
 
-  const { mutate } = useMutation({
-    mutationFn: deleteNote,
-    onMutate: (id) => {
-      setDeletingId(id);
-    },
-    onSuccess: () => {
-      toast.success("Note deleted!");
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-    },
-    onError: () => {
-      toast.error("Failed to delete note");
-    },
-    onSettled: () => {
-      setDeletingId(null);
-    },
-  });
+  if (notes.length === 0) {
+    return null;
+  }
 
-  return notes.length === 0 ? (
-    <p className={css.empty}>No notes found.</p> 
-  ) : (
+  return (
     <ul className={css.list}>
-      {notes.map(({ id, title, content, tag }) => (
-        <li key={id} className={css.listItem}>
-          <h2 className={css.title}>{title}</h2>
-          <p className={css.content}>{content}</p>
+      {notes.map((note) => (
+        <li key={note.id} className={css.listItem}>
+          <h2 className={css.title}>{note.title}</h2>
+          <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
-            <span className={css.tag}>{tag}</span>
-            <button
+            <span className={css.tag}>{note.tag}</span>
+            <button 
               className={css.button}
-              onClick={() => mutate(id)}
-              disabled={deletingId === id}
+              onClick={() => handleDelete(note.id)}
             >
-              {deletingId === id ? "Deleting..." : "Delete"}
+              Delete
             </button>
           </div>
         </li>

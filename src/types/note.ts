@@ -1,20 +1,22 @@
 export interface Note {
-  id: number;
+  id: string;
   title: string;
   content: string;
-  tag: Tag;
-  isArchived: boolean;
+  tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CreateNoteData {
-  title: string;
-  content?: string;
-  tag: Tag;
+export interface NotesResponse {
+  notes: Note[];
+  totalPages: number;
+  currentPage: number;
+  totalCount: number;
+  perPage: number;
 }
-export enum Tag {
-  Todo = "Todo",
-  Work = "Work",
-  Personal = "Personal",
-  Meeting = "Meeting",
-  Shopping = "Shopping",
+  
+export interface CreateNoteRequest {
+  title: string;
+  content: string;
+  tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
 }
