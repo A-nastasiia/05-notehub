@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { fetchNotes, createNote, deleteNote } from '../../services/noteService';
 import NoteList from '../NoteList/NoteList';
 import NoteModal from '../NoteModal/NoteModal';
@@ -16,10 +16,11 @@ const App: React.FC = () => {
   const queryClient = useQueryClient();
 
 const [debouncedSearchQuery] = useDebounce(searchQuery, 800);
+
 const { data: notesData, isLoading, error } = useQuery({
     queryKey: ['notes', currentPage, debouncedSearchQuery],
     queryFn: () => fetchNotes(debouncedSearchQuery, currentPage),
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -77,7 +78,7 @@ const { data: notesData, isLoading, error } = useQuery({
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox value={searchQuery} onSearch={handleSearch} />
+        <SearchBox onSearch={handleSearch} />
 
         {totalPages > 1 && (
           <Pagination
@@ -95,7 +96,7 @@ const { data: notesData, isLoading, error } = useQuery({
       <NoteList notes={notes} onDeleteNote={handleDeleteNote} />
 
       {isModalOpen && (
-        <NoteModal isOpen={isModalOpen} onClose={closeModal} onSubmit={handleCreateNote} />
+        <NoteModal onClose={closeModal} onSubmit={handleCreateNote} />
       )}
     </div>
   );

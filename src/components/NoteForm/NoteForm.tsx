@@ -13,7 +13,7 @@ interface NoteFormValues {
 }
 
 interface NoteFormProps {
-  onSubmit: (values: NoteFormValues) => void;
+  onSubmit?: (values: NoteFormValues) => void;
   onCancel: () => void;
 }
 
