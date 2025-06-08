@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import NoteForm from '../NoteForm/NoteForm';
-import type { CreateNoteRequest } from '../../types/note';
+
 import css from './NoteModal.module.css';
 
 interface NoteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (values: CreateNoteRequest) => void;
+  onSubmit: (values: { title: string; content?: string; tag: string }) => void;
 }
 
 const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, onSubmit }) => {

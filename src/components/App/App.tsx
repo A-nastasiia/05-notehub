@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchNotes, createNote, deleteNote } from '../../services/noteService';
-import type { CreateNoteRequest } from '../../types/note';
 import NoteList from '../NoteList/NoteList';
 import NoteModal from '../NoteModal/NoteModal';
 import Pagination from '../Pagination/Pagination';
 import SearchBox from '../SearchBox/SearchBox';
+import { useDebounce } from 'use-debounce';
 
 import css from "./App.module.css";
 
@@ -15,17 +15,11 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const {
-    data: notesData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['notes', currentPage, searchQuery],
-    queryFn: () => fetchNotes({ 
-      page: currentPage, 
-      perPage: 12, 
-      search: searchQuery 
-    }),
+const [debouncedSearchQuery] = useDebounce(searchQuery, 800);
+const { data: notesData, isLoading, error } = useQuery({
+    queryKey: ['notes', currentPage, debouncedSearchQuery],
+    queryFn: () => fetchNotes(debouncedSearchQuery, currentPage),
+    placeholderData: (previousData) => previousData,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -50,14 +44,14 @@ const App: React.FC = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
-  const handleCreateNote = (noteData: CreateNoteRequest) => {
+  const handleCreateNote = (noteData: { title: string; content?: string; tag: string }) => {
     createNoteMutation.mutate(noteData);
   };
 
-  const handleDeleteNote = (id: string) => {
+  const handleDeleteNote = (id: number) => {
     deleteNoteMutation.mutate(id);
   };
 
@@ -77,18 +71,22 @@ const App: React.FC = () => {
     return <div className={css.app}>Error loading notes</div>;
   }
 
-  const notes = notesData?.notes || [];
+  const notes = notesData?.data || [];
   const totalPages = notesData?.totalPages || 0;
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox onSearch={handleSearch} />
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        <SearchBox value={searchQuery} onSearch={handleSearch} />
+
+        {totalPages > 1 && (
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
+
         <button className={css.button} onClick={openModal}>
           Create note +
         </button>
@@ -96,11 +94,9 @@ const App: React.FC = () => {
 
       <NoteList notes={notes} onDeleteNote={handleDeleteNote} />
 
-      <NoteModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSubmit={handleCreateNote}
-      />
+      {isModalOpen && (
+        <NoteModal isOpen={isModalOpen} onClose={closeModal} onSubmit={handleCreateNote} />
+      )}
     </div>
   );
 };

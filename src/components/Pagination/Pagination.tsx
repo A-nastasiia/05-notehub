@@ -17,13 +17,13 @@ const Pagination: React.FC<PaginationProps> = ({
   }
 
   const handlePageClick = (selectedItem: { selected: number }) => {
-    onPageChange(selectedItem.selected + 1); // ReactPaginate uses 0-based indexing
+    onPageChange(selectedItem.selected + 1); 
   };
 
   return (
     <ReactPaginate
       pageCount={totalPages}
-      forcePage={currentPage - 1} // Convert to 0-based indexing
+      forcePage={currentPage - 1} 
       onPageChange={handlePageClick}
       containerClassName={css.pagination}
       activeClassName={css.active}
