@@ -20,9 +20,8 @@ interface FetchNotesResponse {
 export const fetchNotes = async (
   search: string,
   page: number,
-  perPage: number
 ): Promise<FetchNotesResponse> => {
-  const params: Record<string, string | number> = { page, perPage };
+  const params: Record<string, string | number> = { page, };
 
   if (search.trim() !== "") {
     params.search = search;

@@ -11,7 +11,6 @@ import type { Note } from '../../types/note';
 
 import css from "./App.module.css";
 
-const PER_PAGE = 12;
 
 interface NotesResponse {
   notes: Note[];
@@ -27,7 +26,7 @@ const App: React.FC = () => {
 
   const { data, isLoading, isError, error } = useQuery<NotesResponse, Error>({
     queryKey: ["notes", debouncedSearch, page],
-    queryFn: () => fetchNotes(debouncedSearch, page, PER_PAGE),
+    queryFn: () => fetchNotes(debouncedSearch, page),
     placeholderData: keepPreviousData,
   });
 
