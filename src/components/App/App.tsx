@@ -26,15 +26,14 @@ const App: React.FC = () => {
   const [debouncedSearch] = useDebounce(search, 500);
 
   const { data, isLoading, isError, error } = useQuery<NotesResponse, Error>({
-    queryKey: ["notes", { page, search: debouncedSearch }],
-    queryFn: () =>
-      fetchNotes({ page, perPage: PER_PAGE, search: debouncedSearch }),
+    queryKey: ["notes", debouncedSearch, page],
+    queryFn: () => fetchNotes(debouncedSearch, page, PER_PAGE),
     placeholderData: keepPreviousData,
   });
 
-  const handleSearch = useCallback((searchText: string) => {
+  const handleSearchChange = useCallback((newValue: string) => {
+    setSearch(newValue);
     setPage(1);
-    setSearch(searchText);
   }, []);
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -49,8 +48,7 @@ const App: React.FC = () => {
       <header className={css.toolbar}>
         <SearchBox
           value={search}
-          onChange={setSearch}
-          onSearch={handleSearch}
+          onChange={handleSearchChange}
         />
 
         {data?.totalPages && data.totalPages > 1 && (
@@ -68,7 +66,9 @@ const App: React.FC = () => {
 
       {isLoading && <p className={css.status}>Loading...</p>}
       {isError && (
-        <p className={css.status}>Error: {error?.message ?? "Unknown error"}</p>
+        <p className={css.status}>
+          Error: {error?.message ?? "Unknown error"}
+        </p>
       )}
 
       {data && <NoteList notes={data.notes} />}
