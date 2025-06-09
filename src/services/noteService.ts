@@ -1,41 +1,52 @@
-import axios, { type AxiosResponse } from 'axios';
-import type { Note } from '../types/note';
 
-const API_BASE_URL = 'https://notehub-public.goit.study/api/notes';
+import axios from "axios";
+import type { Note } from "../types/note";
+import type { CreateNoteData } from "../components/NoteForm/NoteForm"
+
+const API_BASE_URL = "https://notehub-public.goit.study/api";
 const API_TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
 
-const api = axios.create({
+const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Authorization': `Bearer ${API_TOKEN}`,
-    'Content-Type': 'application/json',
+    Authorization: `Bearer ${API_TOKEN}`,
   },
 });
 
-export const fetchNotes = async (search: string, page: number ): Promise<{ data: Note[]; totalPages: number }> => {
-  const queryParams = new URLSearchParams({
-    page: page.toString(),
-    perPage: '12',
-  });
+interface FetchNotesParams {
+  page: number;
+  perPage: number;
+  search?: string;
+}
 
-  if (search.trim()) {
-    queryParams.append('search', search.trim());
+interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
+export const fetchNotes = async ({
+  page,
+  perPage,
+  search,
+}: FetchNotesParams): Promise<FetchNotesResponse> => {
+  const params: Record<string, string | number> = { page, perPage };
+
+  if (search && search.trim() !== "") {
+    params.search = search;
   }
 
-  const response: AxiosResponse<{ data: Note[]; totalPages: number }> = await api.get(`?${queryParams}`);
+  const response = await axiosInstance.get<FetchNotesResponse>("/notes", {
+    params,
+  });
   return response.data;
 };
 
-export const createNote = async ({ title, content, tag, }: {
-  title: string;
-  content?: string;
-  tag: string;
-}): Promise<Note> => {
-  const response: AxiosResponse<Note> = await api.post('', { title, content, tag, });
+export const createNote = async (data: CreateNoteData): Promise<Note> => {
+  const response = await axiosInstance.post<Note>("/notes", data);
   return response.data;
 };
 
 export const deleteNote = async (id: number): Promise<Note> => {
-  const response: AxiosResponse<Note> = await api.delete(`/${id}`);
+  const response = await axiosInstance.delete<Note>(`/notes/${id}`);
   return response.data;
 };
